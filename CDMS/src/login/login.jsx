@@ -34,14 +34,11 @@ const Login = () => {
     }
 
     try {
-      const res = await fetch(
-        "http://`${import.meta.env.VITE_API_URL}`/login",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(credentials),
-        },
-      );
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(credentials),
+      });
 
       const data = await res.json();
 
