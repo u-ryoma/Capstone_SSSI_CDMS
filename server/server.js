@@ -13,8 +13,10 @@ app.use(
     origin: [
       "http://localhost:5173", // Local dev
       "http://localhost:3000", // Local backend
-      "https://capstone-sssi-cdms-n6uu-ijb21ueos-u-ryomas-projects.vercel.app", // Your frontend
-      "https://capstone-sssi-cdms-*.vercel.app", // All preview deploys
+      "https://capstone-sssi-cdms-pxle.vercel.app", // ← NEW Vercel frontend
+      "https://capstone-sssi-cdms-n6uu-*.vercel.app", // Old deploys
+      "https://capstone-sssi-cdms-*.vercel.app", // All Vercel
+      "https://capstone-sssi-cdms.onrender.com", // Render backend itself
     ],
     credentials: true,
   }),
