@@ -1,14 +1,33 @@
+require("dotenv").config();
 const express = require("express");
 const { MongoClient, ObjectId } = require("mongodb");
 const cors = require("cors");
+const bcrypt = require("bcrypt");
 
+const SALT_ROUNDS = 10;
 const app = express();
 app.use(cors());
+// app.use(
+//   cors({
+//     origin: [
+//       "http://localhost:3001",
+//       "https://your-app.vercel.app", // ← Update after Vercel deploy
+//       "https://your-app-*.vercel.app",
+//     ],
+//   }),
+// );
 app.use(express.json());
 
-const uri = "mongodb://127.0.0.1:27017";
-const client = new MongoClient(uri);
-
+const uri = process.env.MONGO_URI || "mongodb://127.0.0.1:27017";
+// const client = new MongoClient(uri);
+// const uri = process.env.MONGO_URI;
+// if (!uri) {
+//   throw new Error("MONGO_URI environment variable is required!");
+// }
+const client = new MongoClient(uri, {
+  serverSelectionTimeoutMS: 5000,
+  family: 4, // ← force IPv4
+});
 let db;
 
 async function connectDB() {
@@ -18,6 +37,15 @@ async function connectDB() {
 }
 connectDB();
 
+// ✅ ADD THIS (after connectDB function)
+app.get("/api/health", async (req, res) => {
+  try {
+    await db.command({ ping: 1 });
+    res.json({ status: "healthy", db: "connected" });
+  } catch (error) {
+    res.status(500).json({ status: "unhealthy" });
+  }
+});
 // ==========================
 // HEARTBEAT
 // ==========================
@@ -38,7 +66,7 @@ app.get("/api/active-users", (req, res) => {
 });
 
 // ==========================
-// LOGOUT - clears heartbeat
+// LOGOUT
 // ==========================
 app.post("/api/logout", (req, res) => {
   const { username } = req.body;
@@ -50,12 +78,14 @@ app.post("/api/logout", (req, res) => {
 // LOGIN
 // ==========================
 app.post("/login", async (req, res) => {
-  const { username, password } = req.body;
+  const { email, password } = req.body;
   try {
-    const user = await db.collection("users").findOne({ username });
+    const user = await db.collection("users").findOne({ email });
     if (!user) return res.json({ success: false });
-    if (user.password === password) {
-      heartbeats[username] = Date.now();
+
+    const match = await bcrypt.compare(password, user.password);
+    if (match) {
+      heartbeats[user.username] = Date.now();
       res.json({
         success: true,
         username: user.username,
@@ -66,6 +96,7 @@ app.post("/login", async (req, res) => {
       res.json({ success: false });
     }
   } catch (err) {
+    console.error(err);
     res.status(500).send("Server error");
   }
 });
@@ -104,18 +135,27 @@ app.get("/api/logs", async (req, res) => {
 });
 
 // ==========================
-// ACCOUNTS
+// REGISTER
 // ==========================
 app.post("/api/register", async (req, res) => {
-  const { username, name, password, role } = req.body;
+  const { username, name, email, password, role } = req.body;
   try {
-    const existing = await db.collection("users").findOne({ username });
+    const existing = await db.collection("users").findOne({
+      $or: [{ username }, { email }],
+    });
     if (existing)
-      return res.json({ success: false, message: "Username already exists" });
+      return res.json({
+        success: false,
+        message: "Username or email already exists",
+      });
+
+    const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
+
     await db.collection("users").insertOne({
       username,
       name,
-      password,
+      email,
+      password: hashedPassword,
       role,
       createdAt: new Date().toISOString(),
     });
@@ -125,6 +165,9 @@ app.post("/api/register", async (req, res) => {
   }
 });
 
+// ==========================
+// GET ALL ACCOUNTS
+// ==========================
 app.get("/api/accounts", async (req, res) => {
   try {
     const accounts = await db.collection("users").find().toArray();
@@ -134,20 +177,30 @@ app.get("/api/accounts", async (req, res) => {
   }
 });
 
+// ==========================
+// UPDATE ACCOUNT
+// ==========================
 app.put("/api/accounts/:id", async (req, res) => {
-  const { username, name, role, password } = req.body;
+  const { username, name, email, role, password } = req.body;
   try {
-    const updateData = { username, name, role };
-    if (password) updateData.password = password;
+    const updateData = { username, name, email, role };
+    // ← only hash if password was actually provided
+    if (password && password.trim() !== "") {
+      updateData.password = await bcrypt.hash(password, SALT_ROUNDS);
+    }
     await db
       .collection("users")
       .updateOne({ _id: new ObjectId(req.params.id) }, { $set: updateData });
     res.json({ success: true, message: "Account updated successfully" });
   } catch (err) {
+    console.error(err); // ← add this to see the actual error
     res.status(500).json({ success: false, message: "Update failed" });
   }
 });
 
+// ==========================
+// DELETE ACCOUNT
+// ==========================
 app.delete("/api/accounts/:id", async (req, res) => {
   try {
     await db
@@ -158,7 +211,8 @@ app.delete("/api/accounts/:id", async (req, res) => {
     res.status(500).json({ success: false, message: "Delete failed" });
   }
 });
+module.exports = app;
 
 app.listen(3000, () => {
-  console.log("Server running at http://localhost:3000");
+  console.log("Server running at http://`${import.meta.env.VITE_API_URL}`");
 });

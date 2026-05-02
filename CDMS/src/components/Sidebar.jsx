@@ -10,7 +10,8 @@ export default function Sidebar() {
   // ==========================
   async function saveLog(action) {
     try {
-      await fetch("http://localhost:3000/api/logs", {
+      await fetch();
+      await fetch("http://`${import.meta.env.VITE_API_URL}`/api/logs", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -34,7 +35,7 @@ export default function Sidebar() {
 
     async function sendHeartbeat() {
       try {
-        await fetch("http://localhost:3000/api/heartbeat", {
+        await fetch("http://`${import.meta.env.VITE_API_URL}`/api/heartbeat", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -61,7 +62,7 @@ export default function Sidebar() {
 
       // remove from heartbeat
       navigator.sendBeacon(
-        "http://localhost:3000/api/logout",
+        "http://`${import.meta.env.VITE_API_URL}`/api/logout",
         new Blob(
           [JSON.stringify({ username: sessionStorage.getItem("activeUser") })],
           { type: "application/json" },
@@ -70,7 +71,7 @@ export default function Sidebar() {
 
       // save logout log
       navigator.sendBeacon(
-        "http://localhost:3000/api/logs",
+        "http://`${import.meta.env.VITE_API_URL}`/api/logs",
         new Blob(
           [
             JSON.stringify({
@@ -107,7 +108,7 @@ export default function Sidebar() {
   async function handleLogout() {
     await saveLog("logged out");
 
-    await fetch("http://localhost:3000/api/logout", {
+    await fetch("http://`${import.meta.env.VITE_API_URL}`/api/logout", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -236,7 +237,10 @@ export default function Sidebar() {
       </nav>
 
       <div className="sidebar-footer">
-        <div className="user-display">
+        <div
+          className="user-display"
+          style={{ color: "white", fontWeight: "bold" }}
+        >
           <i className="fas fa-user-circle"></i>
           <span>{sessionStorage.getItem("activeName") || "User"}</span>
         </div>

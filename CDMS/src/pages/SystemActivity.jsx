@@ -10,7 +10,9 @@ export default function Logs() {
 
   async function loadRecentActivity() {
     try {
-      const res = await fetch("http://localhost:3000/api/logs");
+      const res = await fetch(
+        "http://`${import.meta.env.VITE_API_URL}`/api/logs",
+      );
       if (!res.ok) {
         setError(`Server Error: ${res.status}`);
         return;

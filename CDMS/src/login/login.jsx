@@ -1,11 +1,10 @@
-// export default Login;
 import React, { useState, useEffect } from "react";
 import "./login.css";
 import { useNavigate } from "react-router-dom";
 
 const Login = () => {
   const [credentials, setCredentials] = useState({
-    username: "",
+    email: "",
     password: "",
   });
   const [error, setError] = useState("");
@@ -29,17 +28,20 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!credentials.username || !credentials.password) {
+    if (!credentials.email || !credentials.password) {
       setError("Please fill in all fields");
       return;
     }
 
     try {
-      const res = await fetch("http://localhost:3000/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(credentials),
-      });
+      const res = await fetch(
+        "http://`${import.meta.env.VITE_API_URL}`/login",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(credentials),
+        },
+      );
 
       const data = await res.json();
 
@@ -52,15 +54,13 @@ const Login = () => {
         sessionStorage.setItem("activeName", data.name);
         sessionStorage.setItem("userRole", data.role);
 
-        // immediate heartbeat
-        await fetch("http://localhost:3000/api/heartbeat", {
+        await fetch("http://`${import.meta.env.VITE_API_URL}`/api/heartbeat", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ username: data.username }),
         });
 
-        // save login log
-        await fetch("http://localhost:3000/api/logs", {
+        await fetch("http://`${import.meta.env.VITE_API_URL}`/api/logs", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -78,7 +78,7 @@ const Login = () => {
           navigate("/admin/customer", { replace: true });
         }
       } else {
-        setError("Invalid username or password.");
+        setError("Invalid email or password.");
       }
     } catch (err) {
       setError("Cannot connect to server.");
@@ -88,30 +88,30 @@ const Login = () => {
   return (
     <div className="login-container">
       <div className="login-card">
-        <h2>Scientific Standard Services</h2>
-        <p className="subtitle">Please enter your details to sign in.</p>
+        <h2>Login</h2>
+        <p className="subtitle">Scientific Standard Services</p>
 
         {error && <div className="error-message">{error}</div>}
 
-        <form onSubmit={handleSubmit} style={{ width: "100%" }}>
-          <div className="form-group">
-            <label>Username</label>
+        <form onSubmit={handleSubmit}>
+          <div className="login-group">
+            <label>Email</label>
             <input
-              type="text"
-              name="username"
-              placeholder="Username"
-              value={credentials.username}
+              type="email"
+              name="email"
+              placeholder="Enter email"
+              value={credentials.email}
               onChange={handleChange}
               required
             />
           </div>
 
-          <div className="form-group">
+          <div className="login-group">
             <label>Password</label>
             <input
               type="password"
               name="password"
-              placeholder="••••••••"
+              placeholder="Enter password"
               value={credentials.password}
               onChange={handleChange}
               required

@@ -20,8 +20,8 @@ export default function RightPanel() {
   async function loadCurrentlyLoggedIn() {
     try {
       const [logsRes, activeRes] = await Promise.all([
-        fetch("http://localhost:3000/api/logs"),
-        fetch("http://localhost:3000/api/active-users"),
+        fetch("http://`${import.meta.env.VITE_API_URL}`/api/logs"),
+        fetch("http://`${import.meta.env.VITE_API_URL}`/api/active-users"),
       ]);
 
       const logs = await logsRes.json();

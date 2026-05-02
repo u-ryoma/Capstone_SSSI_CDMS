@@ -6,3 +6,4 @@ server/node_modules/
 # Ignore environment variables (very important for your server)
 .env
 server/.env
+CDMS/.env
