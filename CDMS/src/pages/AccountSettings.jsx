@@ -368,11 +368,14 @@ function AddAccount() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await fetch("http://`${import.meta.env.VITE_API_URL}`/api/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
-      });
+      const res = await fetch(
+        "http://`${import.meta.env.VITE_API_URL}`/api/register",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(form),
+        },
+      );
       const data = await res.json();
       setMessage({ text: data.message, success: data.success });
       if (data.success) {
@@ -477,7 +480,9 @@ function AllAccounts() {
 
   async function fetchAccounts() {
     try {
-      const res = await fetch("http://`${import.meta.env.VITE_API_URL}`/api/accounts");
+      const res = await fetch(
+        "http://`${import.meta.env.VITE_API_URL}`/api/accounts",
+      );
       const data = await res.json();
       setAccounts(data);
     } catch (err) {
@@ -515,11 +520,14 @@ function AllAccounts() {
         updateData.password = editForm.password;
       }
 
-      const res = await fetch(`http://`${import.meta.env.VITE_API_URL}`/api/accounts/${id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(updateData),
-      });
+      const res = await fetch(
+        `http://${import.meta.env.VITE_API_URL}/api/accounts/${id}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(updateData),
+        },
+      );
       const data = await res.json();
       setMessage({ text: data.message, success: data.success });
       if (data.success) {
@@ -535,9 +543,12 @@ function AllAccounts() {
     if (!window.confirm("Are you sure you want to delete this account?"))
       return;
     try {
-      const res = await fetch(`http://`${import.meta.env.VITE_API_URL}`/api/accounts/${id}`, {
-        method: "DELETE",
-      });
+      const res = await fetch(
+        `http://${import.meta.env.VITE_API_URL}/api/accounts/${id}`,
+        {
+          method: "DELETE",
+        },
+      );
       const data = await res.json();
       setMessage({ text: data.message, success: data.success });
       if (data.success) fetchAccounts();
