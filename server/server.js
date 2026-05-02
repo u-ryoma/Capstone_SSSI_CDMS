@@ -8,17 +8,22 @@ const SALT_ROUNDS = 10;
 const app = express();
 
 // ✅ FIXED CORS - Allows Vercel frontend
+// app.use(
+//   cors({
+//     origin: [
+//       "http://localhost:5173", // Local dev
+//       "http://localhost:3000", // Local backend
+//       "https://capstone-sssi-cdms-pxle.vercel.app", // ← NEW Vercel frontend
+//       "https://capstone-sssi-cdms-n6uu-*.vercel.app", // Old deploys
+//       "https://capstone-sssi-cdms-*.vercel.app", // All Vercel
+//       "https://capstone-sssi-cdms.onrender.com", // Render backend itself
+//     ],
+//     credentials: true,
+//   }),
+// );
 app.use(
   cors({
-    origin: [
-      "http://localhost:5173", // Local dev
-      "http://localhost:3000", // Local backend
-      "https://capstone-sssi-cdms-pxle.vercel.app", // ← NEW Vercel frontend
-      "https://capstone-sssi-cdms-n6uu-*.vercel.app", // Old deploys
-      "https://capstone-sssi-cdms-*.vercel.app", // All Vercel
-      "https://capstone-sssi-cdms.onrender.com", // Render backend itself
-    ],
-    credentials: true,
+    origin: true, // Allow ALL origins during development
   }),
 );
 
