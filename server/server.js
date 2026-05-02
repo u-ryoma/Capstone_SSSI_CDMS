@@ -11,10 +11,10 @@ const app = express();
 app.use(
   cors({
     origin: [
-      "http://localhost:5173", // Vite dev
+      "http://localhost:5173", // Local dev
       "http://localhost:3000", // Local backend
-      "https://capstone-sssi-cdms-x99d.vercel.app", // Your Vercel frontend
-      "https://capstone-sssi-cdms-x99d-git-main-u-ryoma.vercel.app", // Vercel preview
+      "https://capstone-sssi-cdms-n6uu-ijb21ueos-u-ryomas-projects.vercel.app", // Your frontend
+      "https://capstone-sssi-cdms-*.vercel.app", // All preview deploys
     ],
     credentials: true,
   }),
