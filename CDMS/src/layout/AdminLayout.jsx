@@ -1,6 +1,6 @@
 // export default AdminLayout;
-import Header from "../components/Header";
-import Sidebar from "../components/Sidebar";
+import Header from "../components/Header.jsx";
+import Sidebar from "../components/Sidebar.jsx";
 import Rightpanel from "../components/Rightpanel.jsx";
 import { Outlet, Navigate } from "react-router-dom";
 
