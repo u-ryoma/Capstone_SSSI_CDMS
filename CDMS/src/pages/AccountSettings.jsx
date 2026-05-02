@@ -368,14 +368,11 @@ function AddAccount() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await fetch(
-        "http://`${import.meta.env.VITE_API_URL}`/api/register",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(form),
-        },
-      );
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/register`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
       const data = await res.json();
       setMessage({ text: data.message, success: data.success });
       if (data.success) {
@@ -480,9 +477,7 @@ function AllAccounts() {
 
   async function fetchAccounts() {
     try {
-      const res = await fetch(
-        "http://`${import.meta.env.VITE_API_URL}`/api/accounts",
-      );
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/accounts`);
       const data = await res.json();
       setAccounts(data);
     } catch (err) {
@@ -521,7 +516,7 @@ function AllAccounts() {
       }
 
       const res = await fetch(
-        `http://${import.meta.env.VITE_API_URL}/api/accounts/${id}`,
+        `${import.meta.env.VITE_API_URL}/api/accounts/${id}`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
@@ -544,7 +539,7 @@ function AllAccounts() {
       return;
     try {
       const res = await fetch(
-        `http://${import.meta.env.VITE_API_URL}/api/accounts/${id}`,
+        `${import.meta.env.VITE_API_URL}/api/accounts/${id}`,
         {
           method: "DELETE",
         },

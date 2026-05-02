@@ -7,3 +7,5 @@ server/node_modules/
 .env
 server/.env
 CDMS/.env
+.vercel
+.env*.local

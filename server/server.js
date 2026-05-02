@@ -18,16 +18,16 @@ app.use(cors());
 // );
 app.use(express.json());
 
-const uri = process.env.MONGO_URI || "mongodb://127.0.0.1:27017";
-// const client = new MongoClient(uri);
+// const uri = process.env.MONGO_URI || "mongodb://127.0.0.1:27017";
+const client = new MongoClient(uri);
 // const uri = process.env.MONGO_URI;
 // if (!uri) {
 //   throw new Error("MONGO_URI environment variable is required!");
 // }
-const client = new MongoClient(uri, {
-  serverSelectionTimeoutMS: 5000,
-  family: 4, // ← force IPv4
-});
+// const client = new MongoClient(uri, {
+//   serverSelectionTimeoutMS: 5000,
+//   family: 4, // ← force IPv4
+// });
 let db;
 
 async function connectDB() {
@@ -214,5 +214,5 @@ app.delete("/api/accounts/:id", async (req, res) => {
 module.exports = app;
 
 app.listen(3000, () => {
-  console.log("Server running at http://`${import.meta.env.VITE_API_URL}`");
+  console.log("Server running at `${import.meta.env.VITE_API_URL}`");
 });

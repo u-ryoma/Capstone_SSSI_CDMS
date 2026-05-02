@@ -54,13 +54,13 @@ const Login = () => {
         sessionStorage.setItem("activeName", data.name);
         sessionStorage.setItem("userRole", data.role);
 
-        await fetch("http://`${import.meta.env.VITE_API_URL}`/api/heartbeat", {
+        await fetch(`${import.meta.env.VITE_API_URL}/api/heartbeat`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ username: data.username }),
         });
 
-        await fetch("http://`${import.meta.env.VITE_API_URL}`/api/logs", {
+        await fetch(`${import.meta.env.VITE_API_URL}/api/logs`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
