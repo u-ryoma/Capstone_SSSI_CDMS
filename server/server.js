@@ -1,12 +1,12 @@
-require("dotenv").config();
-const express = require("express");
-const { MongoClient, ObjectId } = require("mongodb");
-const cors = require("cors");
-const bcrypt = require("bcrypt");
+// require("dotenv").config();
+// const express = require("express");
+// const { MongoClient, ObjectId } = require("mongodb");
+// const cors = require("cors");
+// const bcrypt = require("bcrypt");
 
-const SALT_ROUNDS = 10;
-const app = express();
-app.use(cors());
+// const SALT_ROUNDS = 10;
+// const app = express();
+// // app.use(cors());
 // app.use(
 //   cors({
 //     origin: [
@@ -16,38 +16,266 @@ app.use(cors());
 //     ],
 //   }),
 // );
+// app.use(express.json());
+
+// // const uri = process.env.MONGO_URI || "mongodb://127.0.0.1:27017";
+// const client = new MongoClient(uri);
+// // const uri = process.env.MONGO_URI;
+// // if (!uri) {
+// //   throw new Error("MONGO_URI environment variable is required!");
+// // }
+// // const client = new MongoClient(uri, {
+// //   serverSelectionTimeoutMS: 5000,
+// //   family: 4, // ← force IPv4
+// // });
+// let db;
+
+// async function connectDB() {
+//   await client.connect();
+//   db = client.db("ryodb");
+//   console.log("Connected to MongoDB");
+// }
+// connectDB();
+
+// // ✅ ADD THIS (after connectDB function)
+// app.get("/api/health", async (req, res) => {
+//   try {
+//     await db.command({ ping: 1 });
+//     res.json({ status: "healthy", db: "connected" });
+//   } catch (error) {
+//     res.status(500).json({ status: "unhealthy" });
+//   }
+// });
+// // ==========================
+// // HEARTBEAT
+// // ==========================
+// const heartbeats = {};
+
+// app.post("/api/heartbeat", (req, res) => {
+//   const { username } = req.body;
+//   heartbeats[username] = Date.now();
+//   res.json({ success: true });
+// });
+
+// app.get("/api/active-users", (req, res) => {
+//   const now = Date.now();
+//   const activeUsers = Object.entries(heartbeats)
+//     .filter(([_, lastSeen]) => now - lastSeen < 60000)
+//     .map(([username]) => username);
+//   res.json(activeUsers);
+// });
+
+// // ==========================
+// // LOGOUT
+// // ==========================
+// app.post("/api/logout", (req, res) => {
+//   const { username } = req.body;
+//   delete heartbeats[username];
+//   res.json({ success: true });
+// });
+
+// // ==========================
+// // LOGIN
+// // ==========================
+// app.post("/login", async (req, res) => {
+//   const { email, password } = req.body;
+//   try {
+//     const user = await db.collection("users").findOne({ email });
+//     if (!user) return res.json({ success: false });
+
+//     const match = await bcrypt.compare(password, user.password);
+//     if (match) {
+//       heartbeats[user.username] = Date.now();
+//       res.json({
+//         success: true,
+//         username: user.username,
+//         role: user.role,
+//         name: user.name,
+//       });
+//     } else {
+//       res.json({ success: false });
+//     }
+//   } catch (err) {
+//     console.error(err);
+//     res.status(500).send("Server error");
+//   }
+// });
+
+// // ==========================
+// // LOGS
+// // ==========================
+// app.post("/api/logs", async (req, res) => {
+//   try {
+//     const { username, name, role, action, timestamp } = req.body;
+//     await db.collection("logs").insertOne({
+//       username,
+//       name,
+//       role,
+//       action,
+//       timestamp: timestamp || new Date().toISOString(),
+//     });
+//     res.status(201).json({ success: true });
+//   } catch (err) {
+//     res.status(500).json({ success: false });
+//   }
+// });
+
+// app.get("/api/logs", async (req, res) => {
+//   try {
+//     const logs = await db
+//       .collection("logs")
+//       .find()
+//       .sort({ timestamp: -1 })
+//       .limit(100)
+//       .toArray();
+//     res.json(logs);
+//   } catch (err) {
+//     res.status(500).send("Error fetching logs");
+//   }
+// });
+
+// // ==========================
+// // REGISTER
+// // ==========================
+// app.post("/api/register", async (req, res) => {
+//   const { username, name, email, password, role } = req.body;
+//   try {
+//     const existing = await db.collection("users").findOne({
+//       $or: [{ username }, { email }],
+//     });
+//     if (existing)
+//       return res.json({
+//         success: false,
+//         message: "Username or email already exists",
+//       });
+
+//     const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
+
+//     await db.collection("users").insertOne({
+//       username,
+//       name,
+//       email,
+//       password: hashedPassword,
+//       role,
+//       createdAt: new Date().toISOString(),
+//     });
+//     res.json({ success: true, message: "Account created successfully" });
+//   } catch (err) {
+//     res.status(500).json({ success: false, message: "Server error" });
+//   }
+// });
+
+// // ==========================
+// // GET ALL ACCOUNTS
+// // ==========================
+// app.get("/api/accounts", async (req, res) => {
+//   try {
+//     const accounts = await db.collection("users").find().toArray();
+//     res.json(accounts);
+//   } catch (err) {
+//     res.status(500).json({ success: false, message: "Server error" });
+//   }
+// });
+
+// // ==========================
+// // UPDATE ACCOUNT
+// // ==========================
+// app.put("/api/accounts/:id", async (req, res) => {
+//   const { username, name, email, role, password } = req.body;
+//   try {
+//     const updateData = { username, name, email, role };
+//     // ← only hash if password was actually provided
+//     if (password && password.trim() !== "") {
+//       updateData.password = await bcrypt.hash(password, SALT_ROUNDS);
+//     }
+//     await db
+//       .collection("users")
+//       .updateOne({ _id: new ObjectId(req.params.id) }, { $set: updateData });
+//     res.json({ success: true, message: "Account updated successfully" });
+//   } catch (err) {
+//     console.error(err); // ← add this to see the actual error
+//     res.status(500).json({ success: false, message: "Update failed" });
+//   }
+// });
+
+// // ==========================
+// // DELETE ACCOUNT
+// // ==========================
+// app.delete("/api/accounts/:id", async (req, res) => {
+//   try {
+//     await db
+//       .collection("users")
+//       .deleteOne({ _id: new ObjectId(req.params.id) });
+//     res.json({ success: true, message: "Account deleted successfully" });
+//   } catch (err) {
+//     res.status(500).json({ success: false, message: "Delete failed" });
+//   }
+// });
+// module.exports = app;
+
+// const PORT = process.env.PORT || 3000;
+// app.listen(PORT, () => {
+//   console.log(`Server running on port ${PORT}`);
+// });
+require("dotenv").config();
+const express = require("express");
+const { MongoClient, ObjectId } = require("mongodb");
+const cors = require("cors");
+const bcrypt = require("bcrypt");
+
+const SALT_ROUNDS = 10;
+const app = express();
+
+// ✅ FIXED CORS - Allows Vercel frontend
+app.use(
+  cors({
+    origin: [
+      "http://localhost:5173", // Vite dev
+      "http://localhost:3000", // Local backend
+      "https://capstone-sssi-cdms-x99d.vercel.app", // Your Vercel frontend
+      "https://capstone-sssi-cdms-x99d-git-main-u-ryoma.vercel.app", // Vercel preview
+    ],
+    credentials: true,
+  }),
+);
+
 app.use(express.json());
 
-// const uri = process.env.MONGO_URI || "mongodb://127.0.0.1:27017";
+// ✅ FIXED MongoDB URI
+const uri = process.env.MONGO_URI || "mongodb://localhost:27017";
 const client = new MongoClient(uri);
-// const uri = process.env.MONGO_URI;
-// if (!uri) {
-//   throw new Error("MONGO_URI environment variable is required!");
-// }
-// const client = new MongoClient(uri, {
-//   serverSelectionTimeoutMS: 5000,
-//   family: 4, // ← force IPv4
-// });
 let db;
 
 async function connectDB() {
-  await client.connect();
-  db = client.db("ryodb");
-  console.log("Connected to MongoDB");
+  try {
+    await client.connect();
+    db = client.db("ryodb");
+    console.log("✅ Connected to MongoDB");
+  } catch (error) {
+    console.error("❌ MongoDB connection failed:", error);
+    process.exit(1);
+  }
 }
+
+// Initialize DB connection
 connectDB();
 
-// ✅ ADD THIS (after connectDB function)
+// ✅ Health check endpoint
 app.get("/api/health", async (req, res) => {
   try {
-    await db.command({ ping: 1 });
-    res.json({ status: "healthy", db: "connected" });
+    if (db) {
+      await db.command({ ping: 1 });
+      res.json({ status: "healthy", db: "connected" });
+    } else {
+      res.status(503).json({ status: "unhealthy", db: "connecting" });
+    }
   } catch (error) {
     res.status(500).json({ status: "unhealthy" });
   }
 });
+
 // ==========================
-// HEARTBEAT
+// HEARTBEAT SYSTEM
 // ==========================
 const heartbeats = {};
 
@@ -60,14 +288,11 @@ app.post("/api/heartbeat", (req, res) => {
 app.get("/api/active-users", (req, res) => {
   const now = Date.now();
   const activeUsers = Object.entries(heartbeats)
-    .filter(([_, lastSeen]) => now - lastSeen < 60000)
+    .filter(([_, lastSeen]) => now - lastSeen < 60000) // 1 minute
     .map(([username]) => username);
   res.json(activeUsers);
 });
 
-// ==========================
-// LOGOUT
-// ==========================
 app.post("/api/logout", (req, res) => {
   const { username } = req.body;
   delete heartbeats[username];
@@ -116,6 +341,7 @@ app.post("/api/logs", async (req, res) => {
     });
     res.status(201).json({ success: true });
   } catch (err) {
+    console.error(err);
     res.status(500).json({ success: false });
   }
 });
@@ -130,6 +356,7 @@ app.get("/api/logs", async (req, res) => {
       .toArray();
     res.json(logs);
   } catch (err) {
+    console.error(err);
     res.status(500).send("Error fetching logs");
   }
 });
@@ -143,11 +370,13 @@ app.post("/api/register", async (req, res) => {
     const existing = await db.collection("users").findOne({
       $or: [{ username }, { email }],
     });
-    if (existing)
+
+    if (existing) {
       return res.json({
         success: false,
         message: "Username or email already exists",
       });
+    }
 
     const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
 
@@ -159,48 +388,47 @@ app.post("/api/register", async (req, res) => {
       role,
       createdAt: new Date().toISOString(),
     });
+
     res.json({ success: true, message: "Account created successfully" });
   } catch (err) {
+    console.error(err);
     res.status(500).json({ success: false, message: "Server error" });
   }
 });
 
 // ==========================
-// GET ALL ACCOUNTS
+// ACCOUNTS CRUD
 // ==========================
 app.get("/api/accounts", async (req, res) => {
   try {
     const accounts = await db.collection("users").find().toArray();
     res.json(accounts);
   } catch (err) {
+    console.error(err);
     res.status(500).json({ success: false, message: "Server error" });
   }
 });
 
-// ==========================
-// UPDATE ACCOUNT
-// ==========================
 app.put("/api/accounts/:id", async (req, res) => {
   const { username, name, email, role, password } = req.body;
   try {
     const updateData = { username, name, email, role };
-    // ← only hash if password was actually provided
+
     if (password && password.trim() !== "") {
       updateData.password = await bcrypt.hash(password, SALT_ROUNDS);
     }
+
     await db
       .collection("users")
       .updateOne({ _id: new ObjectId(req.params.id) }, { $set: updateData });
+
     res.json({ success: true, message: "Account updated successfully" });
   } catch (err) {
-    console.error(err); // ← add this to see the actual error
+    console.error(err);
     res.status(500).json({ success: false, message: "Update failed" });
   }
 });
 
-// ==========================
-// DELETE ACCOUNT
-// ==========================
 app.delete("/api/accounts/:id", async (req, res) => {
   try {
     await db
@@ -208,11 +436,20 @@ app.delete("/api/accounts/:id", async (req, res) => {
       .deleteOne({ _id: new ObjectId(req.params.id) });
     res.json({ success: true, message: "Account deleted successfully" });
   } catch (err) {
+    console.error(err);
     res.status(500).json({ success: false, message: "Delete failed" });
   }
 });
-module.exports = app;
 
-app.listen(3000, () => {
-  console.log("Server running at `${import.meta.env.VITE_API_URL}`");
+// ✅ Graceful shutdown
+process.on("SIGTERM", async () => {
+  console.log("SIGTERM received, closing DB connection");
+  await client.close();
+  process.exit(0);
+});
+
+// ✅ FIXED PORT - Works on Vercel
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`✅ Server running on port ${PORT}`);
 });
