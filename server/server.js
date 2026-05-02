@@ -83,7 +83,7 @@ app.post("/api/logout", (req, res) => {
 // ==========================
 // LOGIN
 // ==========================
-app.post("/login", async (req, res) => {
+app.post("/api/login", async (req, res) => {
   const { email, password } = req.body;
   try {
     const user = await db.collection("users").findOne({ email });

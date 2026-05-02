@@ -1,7 +1,7 @@
 // export default AdminLayout;
-import Header from "../components/Header.jsx";
-import Sidebar from "../components/Sidebar.jsx";
-import RightPanel from "../components/RightPanel.jsx";
+import Header from "../components/Header";
+import Sidebar from "../components/Sidebar";
+import RightPanel from "../components/RightPanel";
 import { Outlet, Navigate } from "react-router-dom";
 
 const AdminLayout = () => {
@@ -26,7 +26,7 @@ const AdminLayout = () => {
         >
           <Outlet />
         </div>
-        <Rightpanel />
+        <RightPanel />
       </div>
     </div>
   );
