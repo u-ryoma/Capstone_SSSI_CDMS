@@ -1,7 +1,7 @@
 import { useState } from "react";
 import Header from "../components/Header";
 import Sidebar from "../components/Sidebar";
-import Rightpanel from "../components/Rightpanel";
+import RightPanel from "../components/RightPanel";
 import { Outlet, Navigate } from "react-router-dom";
 
 const AdminLayout = () => {
@@ -29,7 +29,7 @@ const AdminLayout = () => {
         >
           <Outlet />
         </div>
-        <Rightpanel />
+        <RightPanel />
       </div>
     </div>
   );
