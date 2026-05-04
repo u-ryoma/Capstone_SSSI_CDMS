@@ -7,20 +7,6 @@ const bcrypt = require("bcrypt");
 const SALT_ROUNDS = 10;
 const app = express();
 
-// ✅ FIXED CORS - Allows Vercel frontend
-// app.use(
-//   cors({
-//     origin: [
-//       "http://localhost:5173", // Local dev
-//       "http://localhost:3000", // Local backend
-//       "https://capstone-sssi-cdms-pxle.vercel.app", // ← NEW Vercel frontend
-//       "https://capstone-sssi-cdms-n6uu-*.vercel.app", // Old deploys
-//       "https://capstone-sssi-cdms-*.vercel.app", // All Vercel
-//       "https://capstone-sssi-cdms.onrender.com", // Render backend itself
-//     ],
-//     credentials: true,
-//   }),
-// );
 app.use(
   cors({
     origin: true, // Allow ALL origins during development
@@ -87,32 +73,6 @@ app.post("/api/logout", (req, res) => {
   res.json({ success: true });
 });
 
-// ==========================
-// LOGIN
-// ==========================
-// app.post("/api/login", async (req, res) => {
-//   const { email, password } = req.body;
-//   try {
-//     const user = await db.collection("users").findOne({ email });
-//     if (!user) return res.json({ success: false });
-
-//     const match = await bcrypt.compare(password, user.password);
-//     if (match) {
-//       heartbeats[user.username] = Date.now();
-//       res.json({
-//         success: true,
-//         username: user.username,
-//         role: user.role,
-//         name: user.name,
-//       });
-//     } else {
-//       res.json({ success: false });
-//     }
-//   } catch (err) {
-//     console.error(err);
-//     res.status(500).send("Server error");
-//   }
-// });
 app.post("/api/login", async (req, res) => {
   const { email, password } = req.body;
   try {
