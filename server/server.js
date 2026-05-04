@@ -90,24 +90,64 @@ app.post("/api/logout", (req, res) => {
 // ==========================
 // LOGIN
 // ==========================
+// app.post("/api/login", async (req, res) => {
+//   const { email, password } = req.body;
+//   try {
+//     const user = await db.collection("users").findOne({ email });
+//     if (!user) return res.json({ success: false });
+
+//     const match = await bcrypt.compare(password, user.password);
+//     if (match) {
+//       heartbeats[user.username] = Date.now();
+//       res.json({
+//         success: true,
+//         username: user.username,
+//         role: user.role,
+//         name: user.name,
+//       });
+//     } else {
+//       res.json({ success: false });
+//     }
+//   } catch (err) {
+//     console.error(err);
+//     res.status(500).send("Server error");
+//   }
+// });
 app.post("/api/login", async (req, res) => {
   const { email, password } = req.body;
   try {
     const user = await db.collection("users").findOne({ email });
-    if (!user) return res.json({ success: false });
+    if (!user)
+      return res.json({
+        success: false,
+        message: "Invalid email or password.",
+      });
 
     const match = await bcrypt.compare(password, user.password);
-    if (match) {
-      heartbeats[user.username] = Date.now();
-      res.json({
-        success: true,
-        username: user.username,
-        role: user.role,
-        name: user.name,
+    if (!match)
+      return res.json({
+        success: false,
+        message: "Invalid email or password.",
       });
-    } else {
-      res.json({ success: false });
+
+    // ← check if user is already logged in
+    if (
+      heartbeats[user.username] &&
+      Date.now() - heartbeats[user.username] < 60000
+    ) {
+      return res.json({
+        success: false,
+        message: "This account is already logged in on another device.",
+      });
     }
+
+    heartbeats[user.username] = Date.now();
+    res.json({
+      success: true,
+      username: user.username,
+      role: user.role,
+      name: user.name,
+    });
   } catch (err) {
     console.error(err);
     res.status(500).send("Server error");

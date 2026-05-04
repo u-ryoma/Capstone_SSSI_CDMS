@@ -55,7 +55,7 @@ function App() {
           <Route
             path="accounts"
             element={
-              <ProtectedRoute allowedRoles={["owner"]}>
+              <ProtectedRoute allowedRoles={["owner", "admin"]}>
                 <AccountSettings />
               </ProtectedRoute>
             }
@@ -88,7 +88,7 @@ function App() {
           <Route
             path="systemactivity"
             element={
-              <ProtectedRoute allowedRoles={["owner"]}>
+              <ProtectedRoute allowedRoles={["owner", "admin"]}>
                 <Logs />
               </ProtectedRoute>
             }

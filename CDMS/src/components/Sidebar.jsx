@@ -10,7 +10,6 @@ export default function Sidebar() {
   // ==========================
   async function saveLog(action) {
     try {
-      await fetch();
       await fetch(`${import.meta.env.VITE_API_URL}/api/logs`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -106,20 +105,43 @@ export default function Sidebar() {
   // LOGOUT
   // ==========================
   async function handleLogout() {
-    await saveLog("logged out");
+    try {
+      // save logout log first
+      await fetch(`${import.meta.env.VITE_API_URL}/api/logs`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          username: sessionStorage.getItem("activeUser"),
+          name: sessionStorage.getItem("activeName"),
+          role: sessionStorage.getItem("userRole"),
+          action: "logged out",
+          timestamp: new Date().toISOString(),
+        }),
+      });
 
-    await fetch(`${import.meta.env.VITE_API_URL}/api/logout`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        username: sessionStorage.getItem("activeUser"),
-      }),
-    });
+      // remove from heartbeat
+      await fetch(`${import.meta.env.VITE_API_URL}/api/logout`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          username: sessionStorage.getItem("activeUser"),
+        }),
+      });
+    } catch (err) {
+      console.error("Logout error:", err);
+    } finally {
+      // always clear and redirect even if fetch fails
+      sessionStorage.clear();
+      localStorage.removeItem("name");
+      localStorage.removeItem("username");
+      navigate("/", { replace: true });
+    }
+  }
 
-    sessionStorage.clear();
-    localStorage.removeItem("name");
-    localStorage.removeItem("username");
-    navigate("/", { replace: true });
+  async function handleConfirmLogout() {
+    const confirmed = window.confirm("Are you sure you want to logout?");
+    if (!confirmed) return; // ← stays logged in
+    await handleLogout();
   }
 
   return (
@@ -137,16 +159,18 @@ export default function Sidebar() {
         <Link className="nav-link" to="/admin/joblist">
           Job Number List
         </Link>
-        {role === "owner" && (
-          <Link className="nav-link" to="/admin/accounts">
-            Accounts
-          </Link>
-        )}
-        {role === "owner" && (
-          <Link className="nav-link" to="/admin/systemactivity">
-            System Activity
-          </Link>
-        )}
+        {role === "owner" ||
+          (role === "admin" && (
+            <Link className="nav-link" to="/admin/accounts">
+              Accounts
+            </Link>
+          ))}
+        {role === "owner" ||
+          (role === "admin" && (
+            <Link className="nav-link" to="/admin/systemactivity">
+              System Activity
+            </Link>
+          ))}
 
         <p className="nav-label">Calibration</p>
         <Link className="nav-link" to="/admin/incomingcalib">
@@ -244,7 +268,7 @@ export default function Sidebar() {
           <i className="fas fa-user-circle"></i>
           <span>{sessionStorage.getItem("activeName") || "User"}</span>
         </div>
-        <a className="nav-link logout" onClick={handleLogout}>
+        <a className="nav-link logout" onClick={handleConfirmLogout}>
           <i className="fas fa-sign-out-alt"></i>
           Logout
         </a>

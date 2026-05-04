@@ -75,7 +75,7 @@ const Login = () => {
           navigate("/admin/customer", { replace: true });
         }
       } else {
-        setError("Invalid email or password.");
+        setError(data.message || "Invalid email or password.");
       }
     } catch (err) {
       setError("Cannot connect to server.");
