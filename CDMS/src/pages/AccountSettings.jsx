@@ -249,8 +249,7 @@ function AllAccounts() {
                 margin: "0 0 20px",
               }}
             >
-              Are you sure you want to delete this account? This cannot be
-              undone.
+              Are you sure you want to delete this account?
             </p>
             <div
               style={{ display: "flex", gap: "8px", justifyContent: "center" }}
