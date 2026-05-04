@@ -124,6 +124,8 @@ function AllAccounts() {
   const [editingId, setEditingId] = useState(null);
   const [editForm, setEditForm] = useState({});
   const [message, setMessage] = useState({ text: "", success: false });
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleteId, setDeleteId] = useState(null);
 
   useEffect(() => {
     fetchAccounts();
@@ -157,18 +159,15 @@ function AllAccounts() {
 
   async function handleUpdate(id) {
     try {
-      // ← only include password if it was changed
       const updateData = {
         username: editForm.username,
         name: editForm.name,
         email: editForm.email,
         role: editForm.role,
       };
-
       if (editForm.password && editForm.password.trim() !== "") {
         updateData.password = editForm.password;
       }
-
       const res = await fetch(
         `${import.meta.env.VITE_API_URL}/api/accounts/${id}`,
         {
@@ -188,12 +187,15 @@ function AllAccounts() {
     }
   }
 
-  async function handleDelete(id) {
-    if (!window.confirm("Are you sure you want to delete this account?"))
-      return;
+  function handleDelete(id) {
+    setDeleteId(id);
+    setShowDeleteConfirm(true);
+  }
+
+  async function confirmDelete() {
     try {
       const res = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/accounts/${id}`,
+        `${import.meta.env.VITE_API_URL}/api/accounts/${deleteId}`,
         {
           method: "DELETE",
         },
@@ -203,11 +205,92 @@ function AllAccounts() {
       if (data.success) fetchAccounts();
     } catch (err) {
       setMessage({ text: "Delete failed.", success: false });
+    } finally {
+      setShowDeleteConfirm(false);
+      setDeleteId(null);
     }
   }
 
   return (
     <div className="tab-content">
+      {/* DELETE CONFIRM MODAL */}
+      {showDeleteConfirm && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100vw",
+            height: "100vh",
+            background: "rgba(0,0,0,0.5)",
+            zIndex: 9999,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <div
+            style={{
+              background: "white",
+              borderRadius: "12px",
+              padding: "28px",
+              width: "320px",
+              textAlign: "center",
+              boxShadow: "0 20px 40px rgba(0,0,0,0.15)",
+            }}
+          >
+            <h3 style={{ margin: "0 0 8px", color: "#18181b" }}>
+              Delete Account
+            </h3>
+            <p
+              style={{
+                color: "#71717a",
+                fontSize: "0.875rem",
+                margin: "0 0 20px",
+              }}
+            >
+              Are you sure you want to delete this account? This cannot be
+              undone.
+            </p>
+            <div
+              style={{ display: "flex", gap: "8px", justifyContent: "center" }}
+            >
+              <button
+                onClick={() => {
+                  setShowDeleteConfirm(false);
+                  setDeleteId(null);
+                }}
+                style={{
+                  padding: "9px 18px",
+                  background: "#f4f4f5",
+                  border: "1px solid #e4e4e7",
+                  borderRadius: "8px",
+                  cursor: "pointer",
+                  fontWeight: "500",
+                  color: "#3f3f46",
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmDelete}
+                style={{
+                  padding: "9px 18px",
+                  background: "#dc2626",
+                  border: "none",
+                  borderRadius: "8px",
+                  cursor: "pointer",
+                  color: "white",
+                  fontWeight: "500",
+                }}
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <h3>All Accounts</h3>
       <p className="tab-subtitle">Manage existing user accounts.</p>
 

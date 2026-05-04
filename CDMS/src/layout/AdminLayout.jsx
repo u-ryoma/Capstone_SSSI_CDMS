@@ -1,32 +1,35 @@
-// export default AdminLayout;
+import { useState } from "react";
 import Header from "../components/Header";
 import Sidebar from "../components/Sidebar";
-import RightPanel from "../components/RightPanel";
+import Rightpanel from "../components/Rightpanel";
 import { Outlet, Navigate } from "react-router-dom";
 
 const AdminLayout = () => {
   const role = sessionStorage.getItem("role");
-  if (!role) {
-    return <Navigate to="/" replace />;
-  }
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  // ← redirect to login if not logged in
   if (!role) {
     return <Navigate to="/" replace />;
   }
 
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100vh" }}>
-      <Header />
+      <Header onMenuToggle={() => setSidebarOpen(!sidebarOpen)} />
       <div className="layout" style={{ flex: 1, minHeight: 0 }}>
-        <Sidebar />
+        <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
         <div
           className="content"
-          style={{ flex: 1, minHeight: 0, overflow: "hidden" }}
+          style={{
+            flex: 1,
+            minHeight: 0,
+            overflow: "hidden",
+            display: "flex",
+            flexDirection: "column",
+          }}
         >
           <Outlet />
         </div>
-        <RightPanel />
+        <Rightpanel />
       </div>
     </div>
   );

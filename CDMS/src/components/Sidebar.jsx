@@ -1,9 +1,10 @@
 import { Link, useNavigate } from "react-router-dom";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
-export default function Sidebar() {
+export default function Sidebar({ isOpen, onClose }) {
   const role = sessionStorage.getItem("role");
   const navigate = useNavigate();
+  const [showConfirm, setShowConfirm] = useState(false);
 
   // ==========================
   // SAVE LOG HELPER
@@ -59,7 +60,6 @@ export default function Sidebar() {
       if (!sessionStorage.getItem("activeUser")) return;
       if (e.persisted) return;
 
-      // remove from heartbeat
       navigator.sendBeacon(
         `${import.meta.env.VITE_API_URL}/api/logout`,
         new Blob(
@@ -68,7 +68,6 @@ export default function Sidebar() {
         ),
       );
 
-      // save logout log
       navigator.sendBeacon(
         `${import.meta.env.VITE_API_URL}/api/logs`,
         new Blob(
@@ -106,7 +105,6 @@ export default function Sidebar() {
   // ==========================
   async function handleLogout() {
     try {
-      // save logout log first
       await fetch(`${import.meta.env.VITE_API_URL}/api/logs`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -119,7 +117,6 @@ export default function Sidebar() {
         }),
       });
 
-      // remove from heartbeat
       await fetch(`${import.meta.env.VITE_API_URL}/api/logout`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -130,7 +127,6 @@ export default function Sidebar() {
     } catch (err) {
       console.error("Logout error:", err);
     } finally {
-      // always clear and redirect even if fetch fails
       sessionStorage.clear();
       localStorage.removeItem("name");
       localStorage.removeItem("username");
@@ -138,124 +134,221 @@ export default function Sidebar() {
     }
   }
 
-  async function handleConfirmLogout() {
-    const confirmed = window.confirm("Are you sure you want to logout?");
-    if (!confirmed) return; // ← stays logged in
-    await handleLogout();
-  }
-
   return (
-    <aside className="sidebar">
+    <aside className={`sidebar ${isOpen ? "active" : ""}`}>
+      {/* CONFIRM LOGOUT MODAL */}
+      {showConfirm && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100vw",
+            height: "100vh",
+            background: "rgba(0,0,0,0.5)",
+            zIndex: 9999,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <div
+            style={{
+              background: "white",
+              borderRadius: "12px",
+              padding: "28px",
+              width: "320px",
+              textAlign: "center",
+              boxShadow: "0 20px 40px rgba(0,0,0,0.15)",
+            }}
+          >
+            <h3 style={{ margin: "0 0 8px", color: "#18181b" }}>
+              Confirm Logout
+            </h3>
+            <p
+              style={{
+                color: "#71717a",
+                fontSize: "0.875rem",
+                margin: "0 0 20px",
+              }}
+            >
+              Are you sure you want to logout?
+            </p>
+            <div
+              style={{ display: "flex", gap: "8px", justifyContent: "center" }}
+            >
+              <button
+                onClick={() => setShowConfirm(false)}
+                style={{
+                  padding: "9px 18px",
+                  background: "#f4f4f5",
+                  border: "1px solid #e4e4e7",
+                  borderRadius: "8px",
+                  cursor: "pointer",
+                  fontWeight: "500",
+                  color: "#3f3f46",
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  setShowConfirm(false);
+                  handleLogout();
+                }}
+                style={{
+                  padding: "9px 18px",
+                  background: "#18181b",
+                  border: "none",
+                  borderRadius: "8px",
+                  cursor: "pointer",
+                  color: "white",
+                  fontWeight: "500",
+                }}
+              >
+                Logout
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <nav className="nav-menu">
         <p className="nav-label">Main Menu</p>
         {(role === "admin" || role === "owner") && (
-          <Link className="nav-link" to="/admin">
+          <Link className="nav-link" to="/admin" onClick={onClose}>
             Dashboard
           </Link>
         )}
-        <Link className="nav-link" to="/admin/customer">
+        <Link className="nav-link" to="/admin/customer" onClick={onClose}>
           Customer
         </Link>
-        <Link className="nav-link" to="/admin/joblist">
+        <Link className="nav-link" to="/admin/joblist" onClick={onClose}>
           Job Number List
         </Link>
-        {role === "owner" ||
-          (role === "admin" && (
-            <Link className="nav-link" to="/admin/accounts">
-              Accounts
-            </Link>
-          ))}
-        {role === "owner" ||
-          (role === "admin" && (
-            <Link className="nav-link" to="/admin/systemactivity">
-              System Activity
-            </Link>
-          ))}
+        {(role === "admin" || role === "owner") && (
+          <Link className="nav-link" to="/admin/accounts" onClick={onClose}>
+            Accounts
+          </Link>
+        )}
+        {(role === "admin" || role === "owner") && (
+          <Link
+            className="nav-link"
+            to="/admin/systemactivity"
+            onClick={onClose}
+          >
+            System Activity
+          </Link>
+        )}
 
         <p className="nav-label">Calibration</p>
-        <Link className="nav-link" to="/admin/incomingcalib">
+        <Link className="nav-link" to="/admin/incomingcalib" onClick={onClose}>
           Incoming Calibration
         </Link>
-        <Link className="nav-link" to="/admin/ongoinggcalib">
+        <Link className="nav-link" to="/admin/ongoinggcalib" onClick={onClose}>
           On Going Calibration
         </Link>
-        <Link className="nav-link" to="/admin/sitecalibration">
+        <Link
+          className="nav-link"
+          to="/admin/sitecalibration"
+          onClick={onClose}
+        >
           Site Calibration
         </Link>
-        <Link className="nav-link" to="/admin/standardforcalib">
+        <Link
+          className="nav-link"
+          to="/admin/standardforcalib"
+          onClick={onClose}
+        >
           Standard For Calibration
         </Link>
-        <Link className="nav-link" to="/admin/schedmonitor">
+        <Link className="nav-link" to="/admin/schedmonitor" onClick={onClose}>
           Schedule Monitor
         </Link>
 
         <p className="nav-label">Standards</p>
-        <Link className="nav-link" to="/admin/stdforcertification">
+        <Link
+          className="nav-link"
+          to="/admin/stdforcertification"
+          onClick={onClose}
+        >
           Std For Certification
         </Link>
-        <Link className="nav-link" to="/admin/stdforupdate">
+        <Link className="nav-link" to="/admin/stdforupdate" onClick={onClose}>
           Std For Update
         </Link>
-        <Link className="nav-link" to="/admin/recallsys">
+        <Link className="nav-link" to="/admin/recallsys" onClick={onClose}>
           Recall System
         </Link>
-        <Link className="nav-link" to="/admin/assetmonitoring">
+        <Link
+          className="nav-link"
+          to="/admin/assetmonitoring"
+          onClick={onClose}
+        >
           Asset Monitoring
         </Link>
-        <Link className="nav-link" to="/admin/instrumenttag">
+        <Link className="nav-link" to="/admin/instrumenttag" onClick={onClose}>
           Instrument Tag
         </Link>
 
         <p className="nav-label">Quotation</p>
-        <Link className="nav-link" to="/admin/qtnlist">
+        <Link className="nav-link" to="/admin/qtnlist" onClick={onClose}>
           Quotation List
         </Link>
-        <Link className="nav-link" to="/admin/qtnforcheck">
+        <Link className="nav-link" to="/admin/qtnforcheck" onClick={onClose}>
           Qtn For Check
         </Link>
-        <Link className="nav-link" to="/admin/qtnforfile">
+        <Link className="nav-link" to="/admin/qtnforfile" onClick={onClose}>
           Qtn For File
         </Link>
-        <Link className="nav-link" to="/admin/qtnforfolowup">
+        <Link className="nav-link" to="/admin/qtnforfolowup" onClick={onClose}>
           Qtn For Follow Up
         </Link>
 
         <p className="nav-label">Concerns</p>
-        <Link className="nav-link" to="/admin/concernincoming">
+        <Link
+          className="nav-link"
+          to="/admin/concernincoming"
+          onClick={onClose}
+        >
           Concern Incoming
         </Link>
-        <Link className="nav-link" to="/admin/concernout">
+        <Link className="nav-link" to="/admin/concernout" onClick={onClose}>
           Concern Out
         </Link>
 
         <p className="nav-label">Documents</p>
-        <Link className="nav-link" to="/admin/jobreceipt">
+        <Link className="nav-link" to="/admin/jobreceipt" onClick={onClose}>
           Job Receipt
         </Link>
-        <Link className="nav-link" to="/admin/deliveryreceipt">
+        <Link
+          className="nav-link"
+          to="/admin/deliveryreceipt"
+          onClick={onClose}
+        >
           Delivery Receipt
         </Link>
-        <Link className="nav-link" to="/admin/printagreement">
+        <Link className="nav-link" to="/admin/printagreement" onClick={onClose}>
           Print Agreement
         </Link>
-        <Link className="nav-link" to="/admin/printfinal">
+        <Link className="nav-link" to="/admin/printfinal" onClick={onClose}>
           Print Final
         </Link>
 
         <p className="nav-label">Checking</p>
-        <Link className="nav-link" to="/admin/forcheckingic">
+        <Link className="nav-link" to="/admin/forcheckingic" onClick={onClose}>
           For Checking OIC
         </Link>
-        <Link className="nav-link" to="/admin/forcheckingsig">
+        <Link className="nav-link" to="/admin/forcheckingsig" onClick={onClose}>
           For Checking Sig
         </Link>
-        <Link className="nav-link" to="/admin/fortyping">
+        <Link className="nav-link" to="/admin/fortyping" onClick={onClose}>
           For Typing
         </Link>
-        <Link className="nav-link" to="/admin/monitoring">
+        <Link className="nav-link" to="/admin/monitoring" onClick={onClose}>
           Monitoring
         </Link>
-        <Link className="nav-link" to="/admin/onholdlist">
+        <Link className="nav-link" to="/admin/onholdlist" onClick={onClose}>
           On Hold List
         </Link>
       </nav>
@@ -268,7 +361,7 @@ export default function Sidebar() {
           <i className="fas fa-user-circle"></i>
           <span>{sessionStorage.getItem("activeName") || "User"}</span>
         </div>
-        <a className="nav-link logout" onClick={handleConfirmLogout}>
+        <a className="nav-link logout" onClick={() => setShowConfirm(true)}>
           <i className="fas fa-sign-out-alt"></i>
           Logout
         </a>
